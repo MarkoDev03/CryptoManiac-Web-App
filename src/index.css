@@ -5,9 +5,33 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  scroll-behavior: smooth;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+
+*::-webkit-scrollbar {
+  width: 5px;               /* width of the entire scrollbar */
+}
+
+*::-webkit-scrollbar-track {
+  background: #292929;        /* color of the tracking area */
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: gold;    /* color of the scroll thumb */
+  border-radius: 20px;       /* roundness of the scroll thumb */
+}
+
+.MuiTableCell-root {
+  padding-block: 6px !important;
+  font-size: 14px !important;
+}
+
+.MuiTableCell-head {
+  padding-block: 12px !important;
 }
