@@ -111,6 +111,11 @@ const CoinChart = ({ coin }) => {
                     hoverBorderWidth: 10
                   },
                 },
+                interaction: {
+                  intersect: false,
+                  mode: 'index',
+                  borderColor:"#fff"
+                },
               }}
             /> 
             <div style={{ display:"flex", marginTop: 20, justifyContent:"space-around", flexDirection: "row", width:"100%" }}>

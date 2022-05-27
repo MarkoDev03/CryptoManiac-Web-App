@@ -248,7 +248,7 @@ const CoinsTable = () => {
                )
              }
            </TableContainer>
-          <Pagination count={130}  onChange={(_, value) => {
+          <Pagination count={120}  onChange={(_, value) => {
             setPage(value);
            window.scroll(0, 450);
           }}
