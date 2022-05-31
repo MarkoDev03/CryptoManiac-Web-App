@@ -1,5 +1,7 @@
-export const CoinList = (currency, page) =>
-  `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=market_cap_desc&per_page=100&page=${page}&sparkline=true`;
+export const CoinList = (currency, page, sort, period) => {
+  console.log(period)
+ return  `https://api.coingecko.com/api/v3/coins/markets?vs_currency=${currency}&order=${sort}&per_page=30&page=${page}&sparkline=true&price_change_percentage=${period}`;
+}
 
 export const SingleCoin = (id) =>
   `https://api.coingecko.com/api/v3/coins/${id}`;

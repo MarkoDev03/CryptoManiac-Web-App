@@ -25,7 +25,7 @@ const useStyles = makeStyles(() => ({
     cursor: "pointer",
     textTransform: "uppercase",
     color: "white",
-    backgroundColor:"rgba(20, 22, 26, 0.8)",
+    backgroundColor:"rgba(20, 22, 26, 0.9)",
     borderRadius: 10,
     marginInline: 10,
     paddingBlock: 15
@@ -35,7 +35,7 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-export function numberWithCommas(x) {
+export function numberWithCommas(x = 0) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
@@ -87,7 +87,7 @@ const Carousel = () => {
          >
          {trending.map((coin, index) => (
            <SwiperSlide key={index} virtualIndex={index}>
-             <CoinItem coinSymbol={coin.symbol} symbol={symbol} classes={classes} coin={coin}currency={currency} />
+             <CoinItem coinSymbol={coin.symbol} symbol={symbol} classes={classes} coin={coin} currency={currency} />
            </SwiperSlide>
          ))}
          </Swiper>

@@ -52,7 +52,7 @@ const CoinChart = ({ coin }) => {
   const [historicData, setHistoricData] = useState([]);
   const [days, setDays] = useState(1)
 
-  const { currency, symbol } = CryptoState()
+  const { currency } = CryptoState()
 
   useEffect(() => {
   const fetchhistoricData = async () => {

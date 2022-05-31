@@ -1,7 +1,7 @@
 import { Container, createTheme, LinearProgress, makeStyles, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, ThemeProvider, Typography } from '@material-ui/core'
 import axios from 'axios'
 import React, { useState, useEffect } from 'react'
-import { useHistory } from 'react-router'
+import { useHistory, useLocation } from 'react-router'
 import { CoinList } from '../config/api'
 import { CryptoState } from '../CryptoContext'
 import { numberWithCommas } from './Banner/Carousel'
@@ -27,26 +27,64 @@ const useStyles = makeStyles(() => ({
 
 const CoinsTable = () => {
 
+  const { search } = useLocation()
+ 
+  const history = useHistory()
+
   const [coins, setCoins] = useState([])
-  const [loading, setLoading] = useState(false)
-  const [search, setSearch] = useState("")
+  const [searchs, setSearch] = useState("")
   const [page, setPage] = useState(1)
 
   const classes = useStyles()
 
-  const history = useHistory()
-  const { currency, symbol } = CryptoState()
+  const { currency, symbol, sort, setLoad, hour, load, setHour, setCurrency, setSort } = CryptoState()
   
   useEffect(() => {
     const fetchCoins = async () => {
-      setLoading(true)
-      const { data } = await axios.get(CoinList(currency, page))
+     
+      setLoad(true)
+      setCoins([])
+      const { data } = await axios.get(CoinList(currency, page, sort, hour))
       setCoins(data)
-      setLoading(false)
+     
+      setLoad(false)
     }
 
     fetchCoins()
-  }, [currency, page]);
+  }, [currency, page, sort, setLoad, hour]);
+
+  useEffect(() => {
+    let sp = new URLSearchParams(search)
+
+    let pageNum = sp.get("number") === null ? "1" : sp.get("number")
+    let sortBy = sp.get("sort_by") === null ? "market_cap_desc" : sp.get("sort_by")
+    let curr = sp.get("currency") === null ? "USD" : sp.get("currency")
+    let period = sp.get("time_period") === null ? "24h" : sp.get("time_period")
+
+    const fetchCoins = async (num, srt, curr) => {
+    
+      setLoad(true)
+      setCoins([])
+
+      setHour(period)
+      setCurrency(curr)
+      setSort(sortBy)
+      setPage(pageNum)
+
+      const { data } = await axios.get(CoinList(curr, num, srt, period))
+      setCoins(data)
+      
+      setLoad(false)
+    }
+
+     fetchCoins(pageNum, sortBy, curr, period)
+
+    return () => {
+      setCoins([])
+      
+    }
+  
+  }, [search, setLoad, setHour, setCurrency, setPage, setSort]);
 
   const darkTheme = createTheme({
     palette: {
@@ -61,8 +99,8 @@ const CoinsTable = () => {
 
   const handleSearch = () => {
     return coins.filter((coin) => (
-      coin.name.toLowerCase().includes(search) || 
-      coin.symbol.toLowerCase().includes(search) 
+      coin.name.toLowerCase().includes(searchs) || 
+      coin.symbol.toLowerCase().includes(searchs) 
     ))
   }
 
@@ -75,48 +113,54 @@ const CoinsTable = () => {
 
    useEffect(() => {
 
-    let currencySymbol = currency === "USD" ? "usdt" : currency.toLowerCase();
-    let ws = new WebSocket(`wss://stream.binance.com:9443/ws/${coin.symbol}${currencySymbol}@ticker`);
+    let wsCurrency = currency === "USD" ? "usdt" : currency.toLowerCase();
+    let wss = `wss://stream.binance.com:9443/ws/${coin.symbol}${wsCurrency}@ticker`;
+    let ws = new WebSocket(wss);
 
      try {
 
-        let lastPriceDef = null;
-        let lastPercentage = null;
+        let wsPrice = null;
+        let wsPercentage = null;
 
         ws.onclose = () => {
-            ws = new WebSocket(`wss://stream.binance.com:9443/ws/${coin.symbol}${currencySymbol}@ticker`);
+            ws = new WebSocket(wss);
         }
 
         ws.onerror = () => {
-            ws = new WebSocket(`wss://stream.binance.com:9443/ws/${coin.symbol}${currencySymbol}@ticker`);
+            ws = new WebSocket(wss);
         }
-
+        
         ws.onmessage = (event) => {
-            let data = JSON.parse(event.data);
-            let priceDef = data.a > 1000 ? parseFloat(data.a).toFixed(0) : data.a < 1000 ? parseFloat(data.a).toFixed(3) : parseFloat(data.a).toFixed(6);
-            let percentage = parseFloat(data.P).toFixed(2);
-            let priceColor = !lastPriceDef || lastPriceDef === priceDef ? "white" : lastPercentage > percentage ? "#FA0A32" : "#16c784" ;
-            let percentageColor = lastPercentage > percentage ? "#FA0A32" : "#16c784"
+            let data = JSON.parse(event?.data);
+            let priceDef = data?.a > 1000 ? parseFloat(data?.a).toFixed(0) : data?.a < 1000 ? parseFloat(data?.a).toFixed(3) : parseFloat(data?.a).toFixed(6);
+            let percentage = parseFloat(data?.P).toFixed(2);
+            let wsColor = !wsPrice || wsPrice === priceDef ? "white" : wsPercentage > percentage ? "#FA0A32" : "#16c784" ;
+            let percentageColor = wsPercentage > percentage ? "#FA0A32" : "#16c784"
   
             setPercentageDailyColor(percentageColor)
-            setColor(priceColor)
+            setColor(wsColor)
             setPercentageDaily(percentage)
             setPrice(numberWithCommas(priceDef))
-            setIcon(lastPercentage > percentage ? "▼" : "▲")
+            setIcon(wsPercentage > percentage ? "▼" : "▲")
   
-           if (priceColor !== "white") {
+           if (wsColor !== "white") {
               setTimeout(() => {
                   setColor("white")
               }, 1000);
            }
       
-            lastPriceDef = priceDef;
-            lastPercentage = percentage;
-          } 
+            wsPrice = priceDef;
+            wsPercentage = percentage;
+          }
      } catch(error) {
          console.log(error);
-         ws = null
-         ws = new WebSocket(`wss://stream.binance.com:9443/ws/${coin.symbol}${currencySymbol}@ticker`);
+         if (ws.readyState === WebSocket.OPEN) {
+             ws.close()
+         }
+         setTimeout(() => {
+          ws = new WebSocket(wss);
+         }, 1500);
+
      }
 
     return () => {
@@ -125,9 +169,11 @@ const CoinsTable = () => {
             setPercentageDailyColor(0);
             setColor("#fff");
             setIcon("▲");
-            ws.close()
-            //webSocket = new WebSocket(`wss://stream.binance.com:9443/ws/${coinSymbol}${currencySymbol}@ticker`);
+           if (ws.readyState === WebSocket.OPEN) {
+                ws.close()
+           }
        }
+      
    }, [coin.symbol]);
 
     let chart = []
@@ -188,7 +234,7 @@ const CoinsTable = () => {
           </TableCell>
           <TableCell align='left'>
             <div style={{display: "flex",flexDirection:"column"}}>
-               <span>{symbol} {numberWithCommas(coin?.total_volume.toString().slice(0, -6))} M</span>
+               <span>{symbol} {numberWithCommas(coin?.total_volume?.toString().slice(0, -6))} M</span>
                <span style={{color: "darkgray", fontSize: 12, whiteSpace:"nowrap", overflow:"hidden", maxWidth: 100, textOverflow:"ellipsis"}}>{coin.total_volume  ? numberWithCommas(((coin?.total_volume / coin?.current_price).toFixed(2)).toString().slice(0, -6)) + " M " : "N/A"} {coin?.symbol.toUpperCase()}</span>
             </div>
         
@@ -199,8 +245,7 @@ const CoinsTable = () => {
                <span style={{color:"#FA0A32", whiteSpace:"nowrap", overflow:"hidden", maxWidth: 100, textOverflow:"ellipsis"}}>▼ {symbol} {coin.atl ? parseFloat( numberWithCommas(coin?.atl)).toFixed(3) : "N/A"}</span>
             </div>
         
-          </TableCell>
-          
+          </TableCell>      
       </TableRow>
     )
   }
@@ -224,7 +269,7 @@ const CoinsTable = () => {
            />
            <TableContainer>
              {
-               loading ? (
+               load ? (
                     <LinearProgress style={{backgroundColor:"gold" }} />
                ) : (
                  <Table>
@@ -248,8 +293,25 @@ const CoinsTable = () => {
                )
              }
            </TableContainer>
-          <Pagination count={120}  onChange={(_, value) => {
+          <Pagination count={412}  onChange={(_, value) => {
             setPage(value);
+            let sp = new URLSearchParams()
+            
+
+            let q = new URLSearchParams(search)
+
+            let currencyQ = q.get("currency")
+
+            
+            sp.set("sort_by", q.get("sort_by") === null ? "market_cap_desc" : q.get("sort_by"))
+            sp.set("number", value)
+            sp.set("currency", currencyQ === null ? "USD" : currencyQ)
+            sp.set("time_period", q.get("time_period") === null ? "24h" : q.get("time_period")) 
+
+            history.push({
+              pathname:"/page",
+              search:"?" + sp
+            })
            window.scroll(0, 450);
           }}
            style={{

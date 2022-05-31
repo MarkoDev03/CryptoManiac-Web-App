@@ -5,7 +5,10 @@ const Crypto = createContext(null);
 
 const CryptoContext = ({ children }) => {
   const [currency, setCurrency] = useState("USD");
+  const [sort, setSort] = useState("market_cap_desc");
   const [symbol, setSymbol] = useState("$");
+  const [load, setLoad] = useState(false);
+  const [hour, setHour] = useState("24h");
 
   useEffect(() => {
     switch (currency) {
@@ -28,7 +31,7 @@ const CryptoContext = ({ children }) => {
 
   return (
     <React.Fragment>
-      <Crypto.Provider value={{ currency, symbol, setCurrency }}>
+      <Crypto.Provider value={{ currency, symbol, setCurrency, sort, setSort, load, setLoad, hour, setHour }}>
           {children}  
       </Crypto.Provider>
     </React.Fragment>

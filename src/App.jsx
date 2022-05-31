@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Route } from 'react-router-dom';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Home from './pages/Home';
@@ -23,8 +23,11 @@ function App() {
         <BrowserRouter>
          <div className={classes.App}>
             <Header />
-            <Route exact path="/" component={Home} />
-            <Route exact path="/coins/:id" component={Coin} />
+            <Switch>
+               <Route exact path="/" component={Home} />
+               <Route exact path="/page" component={Home} />
+               <Route exact path="/coins/:id" component={Coin} />
+            </Switch>
          </div>
         </BrowserRouter>
      </React.Fragment>

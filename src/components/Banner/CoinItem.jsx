@@ -13,59 +13,81 @@ const CoinItem = ({ coin, currency, coinSymbol, classes, symbol }) => {
   
     useEffect(() => {
 
-    let currencySymbol = currency === "USD" ? "usdt" : currency.toLowerCase();
-    let webSocket = new WebSocket(`wss://stream.binance.com:9443/ws/${coinSymbol}${currencySymbol}@ticker`);
+    let wsCurrency = currency === "USD" ? "usdt" : currency.toLowerCase();
+    let wss = `wss://stream.binance.com:9443/ws/${coinSymbol}${wsCurrency}@ticker`;
+    let ws = new WebSocket(wss)
 
      try {
 
-        let lastPriceDef = null;
-        let lastPercentage = null;
+        let wsPrice = null;
+        let wsPercentage = null;
 
-        webSocket.onclose = () => {
-            webSocket = new WebSocket(`wss://stream.binance.com:9443/ws/${coinSymbol}${currencySymbol}@ticker`);
+        ws.onclose = () => {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.close()
+            }
+            ws = new WebSocket(wss);
         }
 
-        webSocket.onerror = () => {
-            webSocket = new WebSocket(`wss://stream.binance.com:9443/ws/${coinSymbol}${currencySymbol}@ticker`);
+        ws.onerror = () => {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.close()
+            }
+            ws = new WebSocket(wss);
         }
 
-        webSocket.onmessage = (event) => {
+        ws.onopen = () => {
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.close()
+            }
+            ws = new WebSocket(wss);
+        }
+
+        ws.onmessage = (event) => {
             let data = JSON.parse(event.data);
             let priceDef = data.a > 1000 ? parseFloat(data.a).toFixed(0) : data.a < 1000 ? parseFloat(data.a).toFixed(3) : parseFloat(data.a).toFixed(6);
             let percentage = parseFloat(data.P).toFixed(2);
-            let priceColor = !lastPriceDef || lastPriceDef === priceDef ? "white" : lastPercentage > percentage ? "#FA0A32" : "#16c784" ;
-            let percentageColor = lastPercentage > percentage ? "#FA0A32" : "#16c784"
-  
+            let wsColor = !wsPrice || wsPrice === priceDef ? "white" : wsPercentage > percentage ? "#FA0A32" : "#16c784" ;
+            let percentageColor = wsPercentage > percentage ? "#FA0A32" : "#16c784"
+
             setPercentageDailyColor(percentageColor)
-            setColor(priceColor)
+            setColor(wsColor)
             setPercentageDaily(percentage)
             setPrice(numberWithCommas(priceDef))
-            setIcon(lastPercentage > percentage ? "▼" : "▲")
+            setIcon(wsPercentage > percentage ? "▼" : "▲")
   
-           if (priceColor !== "white") {
+           if (wsColor !== "white") {
               setTimeout(() => {
                   setColor("white")
               }, 1000);
-           }
+            }
       
-            lastPriceDef = priceDef;
-            lastPercentage = percentage;
-          } 
+            wsPrice = priceDef;
+            wsPercentage = percentage;
+        } 
+
      } catch(error) {
          console.log(error);
-         webSocket = null
-         webSocket = new WebSocket(`wss://stream.binance.com:9443/ws/${coinSymbol}${currencySymbol}@ticker`);
+        if (ws.readyState === WebSocket.OPEN) {
+            ws.close()
+        }
+        setTimeout(() => {
+            ws = new WebSocket(wss);
+        }, 1500);
      }
-
+     
     return () => {
             setPrice(0);
             setPercentageDaily(0);
             setPercentageDailyColor(0);
             setColor("#fff");
             setIcon("▲");
-            webSocket.close()
-            //webSocket = new WebSocket(`wss://stream.binance.com:9443/ws/${coinSymbol}${currencySymbol}@ticker`);
+            if (ws.readyState === WebSocket.OPEN) {
+                ws.close()
+            }
+            ws = new WebSocket(wss);
        }
+    
     }, [coinSymbol, currency]);
 
      return (
@@ -81,7 +103,9 @@ const CoinItem = ({ coin, currency, coinSymbol, classes, symbol }) => {
                  position: "absolute",
                  top: 0,
                  right: 10,
-                 backgroundColor: "#292929"
+                 backgroundColor: "#292929",
+                 borderTopLeftRadius: 0,
+                 borderBottomRightRadius: 0
              }}>
                  <Typography variant="subtitle2">
                     # {coin.market_cap_rank ? coin.market_cap_rank : "N/A"}

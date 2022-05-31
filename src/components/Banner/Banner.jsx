@@ -4,11 +4,11 @@ import Carousel from './Carousel'
 
 const useStyles = makeStyles(() => ({
      banner: {
-        backgroundImage: `url(./banner.jpg)`,
+        backgroundImage: `url(./banner1.jpg)`,
         backgroundAttachment:"fixed"
      },
      bannerContainer: {
-        height: 600,
+        height: 660,
         display: "flex",
         flexDirection: "column",
         paddingTop: 75,

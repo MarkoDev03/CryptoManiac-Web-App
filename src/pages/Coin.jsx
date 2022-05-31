@@ -5,7 +5,6 @@ import { useParams } from 'react-router'
 import CoinChart from '../components/CoinChart';
 import { SingleCoin } from '../config/api';
 import { CryptoState } from '../CryptoContext';
-import ReactHtmlParser from 'react-html-parser';
 import { numberWithCommas } from "../components/Banner/Carousel"
 import { CircularProgressbarWithChildren, buildStyles } from 'react-circular-progressbar';
 import 'react-circular-progressbar/dist/styles.css';
@@ -45,20 +44,20 @@ const Coin = () => {
        [theme.breakpoints.down("md")]: {
          flexDirection: "column",
          alignItems: "center",
-         overflow:"auto"
+         overflow:"auto",
        },
        paddingTop:70
      },
      sidebar: {
        width: "30%",
        [theme.breakpoints.down("md")]: {
-         width: "100%"
+         width: "100%",
+         maxHeight: "fit-content",
        },
        display: "flex",
        flexDirection: "column",
        alignItems:"center",
        marginTop: 25,
-       borderRight:"2px solid grey",
        overflowY:"auto",
        maxHeight: "100vh",
        paddingBottom: 25
@@ -215,6 +214,100 @@ const Coin = () => {
      },
      ranksTitle: {
        fontSize: 20
+     },
+     primary: {
+       width:"100%",
+       display:"flex",
+       justifyContent:"flex-start",
+       alignItems:"center",
+       flexDirection:"row",
+       padding: 0,
+       marginBottom: 10
+     },
+     logoWrapper: {
+        backgroundColor:"#21252b",
+        padding: 20,
+        borderRadius: 30,
+        boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px",
+        position:"relative",
+        zIndex: 2
+     },
+     rankNum: {
+       width: 40,
+       height: 40,
+       color:"#fff",
+       backgroundColor:"#2d323b",
+       borderRadius: "50%",
+       boxShadow: "rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;",
+       position:"absolute",
+       top: -15,
+       right: -10,
+       zIndex: 9,
+       fontWeight: 500,
+       display:"flex",
+       justifyContent:"center",
+       alignItems:"center",
+       lineHeight: 40
+     },
+     names: {
+       display:"flex",
+       justifyContent:"space-between",
+       alignItems:"flex-start",
+       flexDirection:"column",
+       height: 100,
+       flexGrow: 1,
+       padding: 10,
+       marginLeft: 15
+     },
+     pricesWS: {
+      display:"flex",
+      justifyContent:"space-between",
+      alignItems:"flex-end",
+      flexDirection:"row",
+      width:"100%"
+     },
+     wsPrice: {
+       fontSize: 25,
+       fontWeight: 700
+     },
+     waPercentage: {
+       paddingInline: 12,
+       paddingBlock: 7,
+       borderRadius: 20,
+       backgroundColor:"#FA0A32",
+       boxShadow: "rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;",
+       fontSize: 17
+     },
+     name: {
+       fontSize: 25,
+       color:"#a8a8a8"
+     },
+     blckitm: {
+       width:"48%",
+       backgroundColor:"#21252b",
+       borderRadius: 20,
+       boxShadow: "rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;",
+       display:"flex",
+       justifyContent:"space-between",
+       alignItems:"center",
+       flexDirection:"row",
+       paddingBlock: 8,
+       paddingInline: 20,
+       fontSize: 23
+     },
+     border:{
+       height: 65,
+       borderRight:"2px solid #444",
+       marginRight: 15
+     },
+     borderDiv: {
+       marginInline:"auto",
+       marginBottom: 30,
+       width:"45%",
+       height: 7,
+       borderRadius: 20,
+       backgroundColor:"#2d323b",
+       boxShadow: "rgba(0, 0, 0, 0.25) 0px 14px 28px, rgba(0, 0, 0, 0.22) 0px 10px 10px;"
      }
   }))
 
@@ -260,26 +353,54 @@ const Coin = () => {
     <React.Fragment>
       <div className={classes.container} >
         <div className={classes.sidebar}>
-          <img src={coin?.image.large} alt={coin?.name} height="200" style={{marginBottom: 20, borderRadius: 20}} />
-          <Typography variant='h3' className={classes.heading}>{coin?.name}</Typography>
-          {/* <Typography variant="subtitle1" className={classes.description}>{ReactHtmlParser(coin?.description.en.split(". ")[0])}.</Typography> */}
-          <div className={classes.marketData}>
-             <span style={{ display: "flex" }}>
-               <Typography variant='h6' className={classes.heading}>Current price:&nbsp;&nbsp;</Typography>
-               <Typography variant='h6' className={classes.value}>{symbol} {numberWithCommas(coin?.market_data.current_price[currency.toLowerCase()])}</Typography>
-             </span>
-             <span style={{ display: "flex" }}>
-               <Typography variant='h6' className={classes.heading}>Market cap:&nbsp;&nbsp;</Typography>
-               <Typography variant='h6' className={classes.value}>{symbol} {numberWithCommas(coin?.market_data.market_cap[currency.toLowerCase()])} M</Typography>
-             </span>
-          </div>
+
+        <div className={classes.component}>
+           <div className={classes.primary}>
+               <div className={classes.logoWrapper}>
+                    <img src={coin?.image?.large} alt={coin?.name} height="90" style={{borderRadius: "50%"}} />
+                    <span className={classes.rankNum}>#{ranks[0].value}</span>
+               </div>
+               <div className={classes.names}>
+                  <div className={classes.pricesWS}>
+                  <div style={{display:"flex", justifyContent:"flex-start", alignItems:"flex-start", flexDirection:"column"}}>
+                  <Typography variant='h6' className={classes.name}>{coin?.name} / {coin?.symbol}</Typography>
+                  <Typography variant='h6' className={classes.wsPrice}>{symbol} {numberWithCommas(coin?.market_data.current_price[currency.toLowerCase()])}</Typography>
+                  </div> 
+                    <Typography variant='h6' className={classes.waPercentage}>▼ {(coin?.market_data?.price_change_percentage_24h).toFixed(2)}%</Typography>
+                    </div>
+               </div>
+           </div>
+        </div>
+        <div className={classes.component}>
+           <div style={{display:"flex", justifyContent:"space-between", alignItems:"center", flexDirection:"row", width:"100%", marginBottom: 20}}>
+              <div className={classes.blckitm}>
+                   <span>1.00</span>
+                  <div  style={{display:"flex", justifyContent:"center", alignItems:"center"}}>
+                  <div className={classes.border}></div>
+                  <img src={coin?.image.large} alt={coin?.name} height="45" style={{borderRadius: "50%"}} />
+                  </div>
+              </div>
+              <div className={classes.blckitm}>
+                   <span>{symbol} {numberWithCommas(coin?.market_data.current_price[currency.toLowerCase()])}</span>
+             <div style={{display:"flex", justifyContent:"center", alignItems:"center"}}>
+             <div className={classes.border}></div>
+                  <span><b>{currency}</b></span>
+             </div>
+              </div>
+           </div>
+        </div>
+
+        <div className={classes.component}>
+        <div className={classes.borderDiv}></div>
+        </div>
+      
           <div className={classes.atl}>
               <div className={classes.prices}>
-                <BorderPrices title="24h High" backgroundColor="#16c784" value={coin.market_data.high_24h ? coin.market_data.high_24h[currency.toLowerCase()] : "N/A"} />
-                <BorderPrices title="24h Low" backgroundColor="#FA0A32" value={coin.market_data.low_24h ? coin.market_data.low_24h[currency.toLowerCase()] : "N/A"} />
+                <BorderPrices title="24h High" backgroundColor="#16c784" value={coin?.market_data.high_24h ? coin?.market_data.high_24h[currency.toLowerCase()] : "N/A"} />
+                <BorderPrices title="24h Low" backgroundColor="#FA0A32" value={coin?.market_data.low_24h ? coin?.market_data.low_24h[currency.toLowerCase()] : "N/A"} />
               </div>
               <div className={classes.progress}>
-                 <CircularProgressbarWithChildren  value={supply === Infinity ? 0.0 : (supply * 100)} maxValue={100} styles={buildStyles({
+                 <CircularProgressbarWithChildren  value={supply === Infinity ? 0 : (supply * 100)} maxValue={100} styles={buildStyles({
                 
                     pathColor: `#16c784`,
                     textColor: '#fff',
@@ -287,7 +408,7 @@ const Coin = () => {
                     backgroundColor: '#0f0f0f',
                     
                   })}>
-                     <h5 style={{fontSize: 48}}>{supplyPercentage}%</h5>
+                     <h5 style={{fontSize: 48}}>{supplyPercentage === Infinity || supplyPercentage === "Infinity"? "N/A" : supplyPercentage + "%"}</h5>
                      <span style={{fontSize: 22}}>Supply</span>
                   </CircularProgressbarWithChildren>
               </div>
@@ -300,6 +421,7 @@ const Coin = () => {
                    <div className={classes.block} key={data.title}>
                        <span style={{color:"white" , fontWeight: 700 }}>{data.title}</span>
                        <div className={classes.devider}></div>
+                       <span style={{ color:data.color, fontWeight: 700 }}>{data.arrow === false ? "▼" : "▲"}</span>
                        <span style={{ color:data.color, fontWeight: 700 }}>{data.value}%</span>
                     </div>
                  ))

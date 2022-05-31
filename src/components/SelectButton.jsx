@@ -1,5 +1,5 @@
-import React, { Component } from 'react'
-import { makeStyles } from '@material-ui/core';
+import React from 'react'
+import { makeStyles, ButtonBase } from '@material-ui/core';
 
 const SelectButton = ({ children, selected, onClick }) => {
 
@@ -20,14 +20,15 @@ const SelectButton = ({ children, selected, onClick }) => {
             color:"black"
           },
          width:"13%",
-         textAlign:"center"
+         textAlign:"center",
+         boxShadow: "rgba(0, 0, 0, 0.24) 0px 3px 8px",
       }
   }))
 
   const classes = useStyles()
 
   return (
-    <div onClick={onClick} className={classes.selectButton}>{children}</div>
+    <ButtonBase  onClick={onClick} className={classes.selectButton}>{children}</ButtonBase>
   )
 }
 
